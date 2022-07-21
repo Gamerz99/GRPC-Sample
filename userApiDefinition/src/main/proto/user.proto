@@ -1,0 +1,43 @@
+syntax = "proto3";
+package demo;
+import "google/api/annotations.proto";
+
+option java_package = "com.demo.lk";
+
+message GetUserRequest {
+    string userId = 1;
+    bool withAdditionalData = 2;
+}
+
+message GetUserAddressRequest {
+    string userId = 1;
+}
+
+message GetUserResponse {
+    string userId = 1;
+    string userName = 2;
+    string email = 3;
+    UserAddressResponse address = 4;
+}
+
+message UserAddressResponse {
+    string addressLine = 1;
+    string city = 2;
+    string country = 3;
+}
+
+service UserService {
+    rpc getUser (GetUserRequest) returns (GetUserResponse) {
+        option(google.api.http) = {
+            post: "/demo/getUser"
+            body: "*"
+        };
+    }
+
+    rpc getUserAddress (GetUserAddressRequest) returns (UserAddressResponse) {
+        option(google.api.http) = {
+            post: "/demo/getUserAddress"
+            body: "*"
+        };
+    }
+}

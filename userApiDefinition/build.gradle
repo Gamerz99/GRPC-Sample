@@ -1,0 +1,80 @@
+plugins {
+	id 'java-library'
+	id "com.google.protobuf" version "0.8.8"
+}
+
+group = 'userApiDefinition'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.5.1'
+	implementation "io.grpc:grpc-netty-shaded:1.20.0"
+	implementation "io.grpc:grpc-protobuf:1.20.0"
+	implementation "io.grpc:grpc-stub:1.20.0"
+	implementation "io.grpc:grpc-services:1.20.0"
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+sourceSets {
+	main {
+		proto {
+			srcDir "${projectDir}/src/main/proto"
+			include "**/*.proto"
+		}
+		java {
+			srcDirs "src/generated/main/grpc", "src/generated/main/java"
+		}
+	}
+}
+
+task cleanProtoGen {
+	delete "${projectDir}/src/generated/main/grpc"
+	delete "${projectDir}/src/generated/main/java"
+}
+
+protobuf {
+	protoc {
+		artifact = "com.google.protobuf:protoc:3.5.1"
+	}
+
+	plugins {
+		grpc {
+			artifact = "io.grpc:protoc-gen-grpc-java:1.20.0"
+		}
+	}
+
+	generateProtoTasks.generatedFilesBaseDir = "${projectDir}/src/generated"
+
+	generateProtoTasks {
+		all().each { task ->
+			task.plugins {
+				grpc {
+				}
+			}
+		}
+	}
+}
+
+apply plugin: 'maven-publish'
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId 'com.demo.lk'
+			artifactId 'userApiDefinition'
+			from components.java
+		}
+	}
+}
+
+publishToMavenLocal {
+	dependsOn build
+}
